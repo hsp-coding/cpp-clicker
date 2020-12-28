@@ -1,5 +1,13 @@
 # VisualStudio files
 .vs/*
+/Debug/*
+*.log
+*.recipe
+*.ilk
+*.pdb
+*.tlog
+*.idb
+/x64/*
 
 # Prerequisites
 *.d
