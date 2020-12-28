@@ -9,6 +9,7 @@
 #include <iostream>
 #include "windows.h"
 #include <thread>
+#include <chrono>
 
 using namespace std;
 
@@ -19,7 +20,7 @@ const int CLICKDURATIONDEVIATION = 5; //Deviation around the mean click duration
 const int POSITIONDEVIATION = 10; //Deviation around the mean click duration in ms
 
 int percCount = 1;//counts the percentile (10%, 20%,...)
-
+unsigned __int64 start;
 void LeftClick(const int x, const int y)
 {
 	POINT pos;
@@ -32,9 +33,13 @@ void LeftClick(const int x, const int y)
 	SetCursorPos(pos.x, pos.y);
 }
 
-void infoOutput(const int x) {
+void infoOutput(const int x, const unsigned __int64 startTime) {
 	if (x >= MAXCLICK * percCount / 10) {
-		cout << percCount << "0% der Clicks erreicht" << endl;
+		unsigned __int64 now = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
+		unsigned __int64 elapsed = now - start;
+		unsigned __int64 maxDuration = (elapsed * 10) / percCount;
+		unsigned __int64 remaining = maxDuration - elapsed;
+		cout << percCount << "0% der Clicks erreicht, " << remaining/1000 << "seconds remaining" << endl;
 		percCount++;
 	}
 
@@ -55,6 +60,7 @@ int main() {
 	int x = (int)pos.x;
 	int y = (int)pos.y;
 	int i = 1;
+	start = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
 
 	cout << "Initial Position: Pos.x= " << x << "Pos.y= " << y << endl;
 	while (i <= MAXCLICK) {
@@ -66,7 +72,7 @@ int main() {
 		LeftClick(x, y);
 		Sleep(CLICKPAUSE);
 		i++;
-		infoOutput(i);
+		infoOutput(i, start);
 	}
 	cout << "Finished";
 	return 0;
